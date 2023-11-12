@@ -3,7 +3,7 @@ module.exports = {
     content: ["./src/**/*.{js,jsx,ts,tsx}"],
     theme: {
         screens: {
-            sm: "480px", // Adjust the breakpoint to target smaller screens like phones
+            sm: "375px", // Adjusted breakpoint for small screens like iPhone 12
             md: "768px",
             lg: "1024px",
             xl: "1280px",

@@ -14,7 +14,7 @@ function Scanner() {
             </div>
 
             <div className="relative row-span-2">
-                <div className=" relative text-center pt-10 main-font tracking-widest sm:ml-[400px] lg:ml-[650px]">
+                <div className=" relative text-center pt-10 main-font tracking-widest sm:ml-[150px] lg:ml-[650px]">
                     <span className=" text-7xl text-violet-500 ">LAYERFi </span>
                     <span className=" text-7xl border-b-2  border-cyan-600">
                         PROTOCOL
