@@ -15,6 +15,10 @@ function App() {
 
     let element = useRoutes([
         {
+            path: "/",
+            element: <Scanner />,
+        },
+        {
             path: "/dashboard",
             element: <RedirectToExternalUrl url="https://layerfi.net/" />,
         },
