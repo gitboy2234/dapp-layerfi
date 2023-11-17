@@ -217,7 +217,7 @@ function Scanner() {
             </div>
 
             <div className="relative row-span-2">
-                <div className="relative text-center pt-10 main-font tracking-widest sm:ml-[100px] lg:ml-[650px]">
+                <div className="relative text-center pt-10 main-font tracking-widest sm:ml-[40px] lg:ml-[650px]">
                     <span className="sm:text-6xl md:text-7xl text-violet-500">
                         LAYERFi
                     </span>
