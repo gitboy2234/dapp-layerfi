@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import "../src/components/Sidebar/sidebar";
 import { useRoutes } from "react-router-dom";
+import Scanner from "../src/pages/Scanner/scanner";
 import FloozWidget from "../src/pages/swap/swap";
 import RedirectToExternalUrl from "../src/components/RedirectToExternalUrl";
-import homevideo from "../src/assets/Video/homevid.mp4";
-import Scanner from "../src/pages/Scanner/scanner";
+import RedirectToBuy from "../src/components/RedirectToBuyUrl";
+import RedirectToMarketUrl from "../src/components/RedirectToMarketUrl";
+import Soon from "../src/pages/Soon/soon";
 import { helix } from "ldrs";
 
 function App() {
@@ -30,15 +31,34 @@ function App() {
             path: "/swap",
             element: <FloozWidget />,
         },
+        {
+            path: "/buy",
+            element: (
+                <RedirectToBuy url="https://pancakeswap.finance/swap?outputCurrency=0xA7278e14aedDCaE50315166DA9c1869653830023" />
+            ),
+        },
+        {
+            path: "/stake",
+            element: <Soon />,
+        },
+        {
+            path: "/market",
+            element: <RedirectToMarketUrl url="https://market.layerfi.net/" />,
+        },
+        {
+            path: "/social",
+            element: <Soon />,
+        },
     ]);
+
     useEffect(() => {
         const fadeOutTimer = setTimeout(() => {
             setLoading(false);
-        }, 3000); // Duration until fade-out starts
+        }, 3000);
 
         const loaderHideTimer = setTimeout(() => {
             setShowLoader(false);
-        }, 4000); // Duration until loader is completely hidden
+        }, 4000);
 
         return () => {
             clearTimeout(fadeOutTimer);
@@ -47,7 +67,7 @@ function App() {
     }, []);
 
     return (
-        <div>
+        <div className="">
             {showLoader && (
                 <div
                     className={`fixed inset-0 bg-black flex justify-center items-center ${
@@ -57,22 +77,7 @@ function App() {
                 </div>
             )}
             <div className={`${loading ? "hidden" : ""}`}>
-                <div className="fade  curve  z-0 bg-cover fixed">
-                    <div className="relative bg-cover bg-opacity-80 bg-black z-10">
-                        <video autoPlay loop muted id="video" className="z-0">
-                            <source src={homevideo} type="video/mp4" />
-                        </video>
-                    </div>
-                </div>
-
-                <div
-                    className={`z-10 ${
-                        loading
-                            ? "opacity-0"
-                            : "opacity-100 transition-opacity duration-1000"
-                    }`}>
-                    {element}
-                </div>
+                <div className="content">{element}</div>
             </div>
         </div>
     );

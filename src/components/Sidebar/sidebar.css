@@ -26,3 +26,43 @@
 .hideNav {
     animation: hideNav 0.5s ease forwards;
 }
+
+.hover-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.hover-effect .slide-effect {
+    position: absolute;
+    top: 0;
+    left: -100%; /* Start from the left */
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background-image: linear-gradient(
+        to right,
+        #a55be4,
+        #c97df0
+    ); /* Gradient color */
+    transition: left 0.5s; /* Adjust the speed of the sliding effect */
+}
+
+.hover-effect:hover .slide-effect {
+    left: 0; /* Slide to fill the box */
+}
+
+.active-page {
+    position: relative;
+    border-left: 4px solid;
+    color: #9b51e0;
+}
+
+.active-page:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 50%;
+}
