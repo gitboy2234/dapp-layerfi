@@ -8,3 +8,12 @@
 .custom-button {
     background-color: #00d084;
 }
+
+.copy-success-message {
+    position: absolute;
+    /* Adjust the styling as needed */
+    background-color: #fff;
+    border: 1px solid #000;
+    padding: 8px;
+    z-index: 100;
+}

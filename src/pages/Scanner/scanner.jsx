@@ -11,12 +11,15 @@ import Button from "@mui/material/Button";
 import { TbDiscountCheckFilled, TbAlertOctagonFilled } from "react-icons/tb";
 import CircularProgress from "@mui/material/CircularProgress";
 import { FaCopy } from "react-icons/fa6";
+import Alert from "@mui/material/Alert";
+import { FaCheck } from "react-icons/fa6";
 function Scanner() {
     const [contractAddress, setContractAddress] = useState("");
     const [verificationStatus, setVerificationStatus] = useState("");
     const [contractAnalysis, setContractAnalysis] = useState([]);
     const [honeypotAnalysis, setHoneypotAnalysis] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(false);
 
     const web3 = new Web3(
         Web3.givenProvider ||
@@ -196,6 +199,8 @@ function Scanner() {
                 .writeText(summaryText)
                 .then(() => {
                     console.log("Summary copied to clipboard");
+                    setCopySuccess(true);
+                    setTimeout(() => setCopySuccess(false), 2000); // Hide message after 2 seconds
                 })
                 .catch((err) => {
                     console.error("Failed to copy: ", err);
@@ -223,7 +228,14 @@ function Scanner() {
                     <span>The First Autonomous Protocol on Multi Network</span>
                 </div>
             </div>
-
+            {copySuccess && (
+                <Alert
+                    icon={<FaCheck />}
+                    severity="success"
+                    className="absolute z-50 md:bottom-36 md:left-14 sm:left-32  ">
+                    Copied to clipboard!
+                </Alert>
+            )}
             <div className="relative mt-10 px-2 w-full">
                 <div className="h-3/4 border-2 bg-white rounded-xl mx-auto sm:w-full md:w-1/2 lg:ml-[300px] xl:ml-[500px] py-5 ">
                     <div className="flex border-b-2 border-violet-300 ">
