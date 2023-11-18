@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Web3 from "web3";
 import "./scanner.css";
 import BigInt from "bignumber.js";
@@ -13,6 +13,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { FaCopy } from "react-icons/fa6";
 import Alert from "@mui/material/Alert";
 import { FaCheck } from "react-icons/fa6";
+
 function Scanner() {
     const [contractAddress, setContractAddress] = useState("");
     const [verificationStatus, setVerificationStatus] = useState("");
@@ -20,11 +21,41 @@ function Scanner() {
     const [honeypotAnalysis, setHoneypotAnalysis] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [network, setNetwork] = useState("BSC");
+    const [web3, setWeb3] = useState(null);
 
-    const web3 = new Web3(
-        Web3.givenProvider ||
-            "https://skilled-aged-replica.bsc.quiknode.pro/fa781ac0e208b4f43499a55709c6af36b7784544/"
-    );
+    useEffect(() => {
+        let provider;
+        if (network === "Ethereum") {
+            provider =
+                "https://mainnet.infura.io/v3/e869620b99334119bba095c34ccb8558";
+        } else {
+            provider =
+                "https://skilled-aged-replica.bsc.quiknode.pro/fa781ac0e208b4f43499a55709c6af36b7784544/";
+        }
+        setWeb3(new Web3(provider));
+    }, [network]);
+
+    const getApiEndpoint = (network, contractAddress, type) => {
+        const apiKey =
+            network === "Ethereum"
+                ? "FUMHTQE96FPWIW79ZJFCIXFX5BPCGNQC7T"
+                : "JUDPV627WC6YPRF9PJ992PQ4MMAIZVCDVV";
+        const baseUrl =
+            network === "Ethereum"
+                ? "https://api.etherscan.io/api"
+                : "https://api.bscscan.com/api";
+        switch (type) {
+            case "abi":
+                return `${baseUrl}?module=contract&action=getabi&address=${contractAddress}&apikey=${apiKey}`;
+            case "tx":
+                return `${baseUrl}?module=account&action=txlist&address=${contractAddress}&startblock=0&endblock=99999999&sort=asc&apikey=${apiKey}`;
+            case "source":
+                return `${baseUrl}?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${apiKey}`;
+            default:
+                return "";
+        }
+    };
 
     const scanContract = async () => {
         setIsLoading(true);
@@ -34,15 +65,13 @@ function Scanner() {
             return;
         }
 
-        const apiKey = "JUDPV627WC6YPRF9PJ992PQ4MMAIZVCDVV";
-        const abiUrl = `https://api.bscscan.com/api?module=contract&action=getabi&address=${contractAddress}&apikey=${apiKey}`;
-        const txUrl = `https://api.bscscan.com/api?module=account&action=txlist&address=${contractAddress}&startblock=0&endblock=99999999&sort=asc&apikey=${apiKey}`;
-        const sourceUrl = `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${apiKey}`;
+        const abiUrl = getApiEndpoint(network, contractAddress, "abi");
+        const txUrl = getApiEndpoint(network, contractAddress, "tx");
+        const sourceUrl = getApiEndpoint(network, contractAddress, "source");
 
         try {
             const abiResponse = await fetch(abiUrl);
             const abiData = await abiResponse.json();
-
             if (abiData.status !== "1") {
                 setVerificationStatus("NOT A VALID CONTRACT");
                 setContractAnalysis([]);
@@ -126,11 +155,20 @@ function Scanner() {
             const response = await fetch(honeypotUrl);
             const data = await response.json();
 
+            // Check if the honeypotResult is present and set the analysis
             if (data && data.honeypotResult) {
                 setHoneypotAnalysis(data);
             } else {
-                setHoneypotAnalysis(null);
-                console.error("Invalid response format from honeypot API.");
+                // Fallback: Set the analysis to the response itself or a part of it
+                // Modify this according to the structure of your API response
+                const fallbackAnalysis = {
+                    unknownStatus: true,
+                    reason:
+                        data.simulationError ||
+                        "Could not determine the status.",
+                };
+                setHoneypotAnalysis(fallbackAnalysis);
+                console.error("Fallback honeypot analysis:", fallbackAnalysis);
             }
         } catch (error) {
             console.error("Error fetching honeypot data:", error);
@@ -252,12 +290,18 @@ function Scanner() {
                                 alignItems: "flex-end",
                                 width: "full",
                             }}>
+                            <select
+                                value={network}
+                                onChange={(e) => setNetwork(e.target.value)}>
+                                <option value="BSC">BSC</option>
+                                <option value="Ethereum">Ethereum</option>
+                            </select>
                             <div className="mx-5">
                                 <IoMdQrScanner size={35} />
                             </div>
                             <TextField
                                 id="contract-address-input"
-                                label="Enter Contract Address"
+                                label="ENTER CONTRACT ADDRESS"
                                 variant="standard"
                                 fullWidth
                                 value={contractAddress}
@@ -282,39 +326,38 @@ function Scanner() {
                             <div className="my-4 px-5 tracking-wider">
                                 <div className="relative">
                                     <div
-                                        className="justify-end flex hover:cursor-pointer text-violet-600"
+                                        className="justify-end flex hover:cursor-pointer text-violet-600 "
                                         onClick={copyToClipboard}>
                                         <FaCopy size={25} />
                                     </div>
                                 </div>
 
-                                <div className="">
-                                    <div>
-                                        {honeypotAnalysis && (
-                                            <p>
-                                                <span className=" text-violet-800 text-2xl">
+                                <div>
+                                    {honeypotAnalysis ? (
+                                        <>
+                                            <div>
+                                                <span className="text-violet-800 text-2xl">
                                                     IS THIS HONEYPOT:{" "}
                                                 </span>
                                                 <br />
-                                                {honeypotAnalysis.honeypotResult
-                                                    .isHoneypot ? (
-                                                    <>
+                                                {honeypotAnalysis.honeypotResult ? (
+                                                    honeypotAnalysis
+                                                        .honeypotResult
+                                                        .isHoneypot ? (
                                                         <div className="flex space-x-2 text-center ">
-                                                            <span className="md:mt-0.5 text-red-600 sm:mt-3  animate-pulse">
+                                                            <span className="md:mt-0.5 text-red-600 sm:mt-3 animate-pulse">
                                                                 <TbAlertOctagonFilled
                                                                     size={25}
                                                                 />
                                                             </span>
-                                                            <span className="mt-1 ">
+                                                            <span className="mt-1">
                                                                 YES! This token
                                                                 is a honeypot,
                                                                 Please don't buy
                                                                 this token.
                                                             </span>
                                                         </div>
-                                                    </>
-                                                ) : (
-                                                    <>
+                                                    ) : (
                                                         <div className="flex space-x-2 text-center">
                                                             <span className="md:mt-0.5 sm:mt-3 text-green-500 animate-pulse">
                                                                 <TbDiscountCheckFilled
@@ -331,105 +374,109 @@ function Scanner() {
                                                                 honeypots.
                                                             </span>
                                                         </div>
-                                                    </>
+                                                    )
+                                                ) : (
+                                                    <p>
+                                                        Unable to determine
+                                                        honeypot status.
+                                                    </p>
                                                 )}
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="">
-                                        {honeypotAnalysis && (
+                                            </div>
                                             <div>
-                                                <p className=" text-violet-800 text-2xl">
+                                                <p className="text-violet-800 text-2xl">
                                                     TOKEN BASIC ANALYSIS:
                                                 </p>
-                                                <div className="">
-                                                    <span className=" text-green-500">
-                                                        TOKEN NAME:
-                                                    </span>{" "}
-                                                    <span className="">
-                                                        {" "}
-                                                        {
-                                                            honeypotAnalysis
-                                                                .token.name
-                                                        }
-                                                    </span>
-                                                </div>
+                                                {honeypotAnalysis.token && (
+                                                    <>
+                                                        <div>
+                                                            <span className="text-green-500">
+                                                                TOKEN NAME:{" "}
+                                                            </span>
+                                                            <span>
+                                                                {
+                                                                    honeypotAnalysis
+                                                                        .token
+                                                                        .name
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex">
+                                                            <span className="text-green-500">
+                                                                ADDRESS:{" "}
+                                                            </span>
+                                                            <span>
+                                                                {
+                                                                    honeypotAnalysis
+                                                                        .token
+                                                                        .address
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-green-500">
+                                                                TOTAL HOLDERS:{" "}
+                                                            </span>
+                                                            <span>
+                                                                {
+                                                                    honeypotAnalysis
+                                                                        .token
+                                                                        .totalHolders
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
-                                        )}
-                                        <div>
-                                            {honeypotAnalysis && (
-                                                <div className="flex">
-                                                    <span className=" text-green-500">
-                                                        ADDRESS:
-                                                    </span>
-                                                    <span>
-                                                        {
+                                            <p
+                                                className={
+                                                    verificationStatus ===
+                                                    "This contract is verified."
+                                                        ? "text-green-500"
+                                                        : "text-red-500"
+                                                }>
+                                                {verificationStatus}
+                                            </p>
+                                            {honeypotAnalysis.simulationResult && (
+                                                <>
+                                                    <p
+                                                        className={
                                                             honeypotAnalysis
-                                                                .token.address
-                                                        }
-                                                    </span>
-                                                </div>
+                                                                .simulationResult
+                                                                .buyTax > 15
+                                                                ? "text-red-500"
+                                                                : "text-green-500"
+                                                        }>
+                                                        Buy Tax:{" "}
+                                                        {honeypotAnalysis.simulationResult.buyTax.toFixed(
+                                                            2
+                                                        )}
+                                                        %
+                                                    </p>
+                                                    <p
+                                                        className={
+                                                            honeypotAnalysis
+                                                                .simulationResult
+                                                                .sellTax > 15
+                                                                ? "text-red-500"
+                                                                : "text-green-500"
+                                                        }>
+                                                        Sell Tax:{" "}
+                                                        {honeypotAnalysis.simulationResult.sellTax.toFixed(
+                                                            2
+                                                        )}
+                                                        %
+                                                    </p>
+                                                </>
                                             )}
-                                        </div>
-                                        {honeypotAnalysis && (
-                                            <div>
-                                                <span className=" text-green-500">
-                                                    TOTAL HOLDERS:{" "}
-                                                </span>
-                                                <span>
-                                                    {
-                                                        honeypotAnalysis.token
-                                                            .totalHolders
-                                                    }
-                                                </span>
-                                            </div>
-                                        )}
-                                        <p
-                                            className={
-                                                verificationStatus ===
-                                                "This contract is verified."
-                                                    ? "text-green-500"
-                                                    : "text-red-500"
-                                            }>
-                                            {verificationStatus}
+                                        </>
+                                    ) : (
+                                        <p>
+                                            No data available. Please Scan
+                                            Contract.
                                         </p>
-
-                                        {honeypotAnalysis && (
-                                            <>
-                                                <p
-                                                    className={
-                                                        honeypotAnalysis
-                                                            .simulationResult
-                                                            .buyTax > 15
-                                                            ? "text-red-500"
-                                                            : "text-green-500"
-                                                    }>
-                                                    Buy Tax:{" "}
-                                                    {honeypotAnalysis.simulationResult.buyTax.toFixed(
-                                                        2
-                                                    )}
-                                                    %
-                                                </p>
-                                                <p
-                                                    className={
-                                                        honeypotAnalysis
-                                                            .simulationResult
-                                                            .sellTax > 15
-                                                            ? "text-red-500"
-                                                            : "text-green-500"
-                                                    }>
-                                                    Sell Tax:{" "}
-                                                    {honeypotAnalysis.simulationResult.sellTax.toFixed(
-                                                        2
-                                                    )}
-                                                    %
-                                                </p>
-                                            </>
-                                        )}
-                                    </div>
+                                    )}
                                 </div>
+
                                 <div>
                                     <div>
                                         {contractAnalysis.map((line, index) => (
