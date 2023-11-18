@@ -59,6 +59,7 @@ function Scanner() {
 
     const scanContract = async () => {
         setIsLoading(true);
+
         if (!contractAddress) {
             alert("Please enter a contract address.");
             setIsLoading(false);
@@ -72,6 +73,7 @@ function Scanner() {
         try {
             const abiResponse = await fetch(abiUrl);
             const abiData = await abiResponse.json();
+
             if (abiData.status !== "1") {
                 setVerificationStatus("NOT A VALID CONTRACT");
                 setContractAnalysis([]);
@@ -90,19 +92,21 @@ function Scanner() {
 
             const sourceResponse = await fetch(sourceUrl);
             const sourceData = await sourceResponse.json();
+
+            let analysisLines = [];
+
             if (sourceData.status === "1" && sourceData.result.length > 0) {
                 const sourceCode = sourceData.result[0].SourceCode;
 
-                const creatorBalance = BigInt(
+                const creatorBalance = new BigInt(
                     await contract.methods.balanceOf(creatorAddress).call()
                 );
-                const totalSupply = BigInt(
+                const totalSupply = new BigInt(
                     await contract.methods.totalSupply().call()
                 );
                 const creatorPercentage =
-                    (creatorBalance * BigInt(100)) / totalSupply;
+                    (creatorBalance * new BigInt(100)) / totalSupply;
 
-                let analysisLines = [];
                 analysisLines.push({
                     text: "Contract Analysis Report:",
                     className: "text-2xl text-violet-800",
@@ -128,13 +132,42 @@ function Scanner() {
                             ? "text-red-500"
                             : "text-green-500",
                 });
-
-                setContractAnalysis(analysisLines);
             } else {
                 setContractAnalysis([
                     "Unable to fetch or analyze contract source code.",
                 ]);
+                setIsLoading(false);
+                return;
             }
+
+            try {
+                const isPaused = await contract.methods.paused().call();
+                analysisLines.push({
+                    text: `Contract is ${
+                        isPaused
+                            ? "paused the trading on this pair"
+                            : "not paused but it can be paused"
+                    }.`,
+                    className: isPaused ? "text-red-500" : "text-green-500",
+                });
+            } catch (error) {
+                analysisLines.push({
+                    text: "Pausable Function that can pause the TX is not found on Contract",
+                    className: "text-green-500",
+                });
+            }
+
+            try {
+                const ownerAddress = await contract.methods.owner().call();
+                analysisLines.push({
+                    text: `Owner of the contract: ${ownerAddress}.`,
+                    className: "",
+                });
+            } catch (error) {
+                console.log("Owner function not found in contract.");
+            }
+
+            setContractAnalysis(analysisLines);
         } catch (error) {
             console.error("Error in scanning contract:", error);
             setVerificationStatus("Error during scanning.");
@@ -433,6 +466,19 @@ function Scanner() {
                                                                         .token
                                                                         .totalHolders
                                                                 }
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-green-500">
+                                                                Max Buy:{" "}
+                                                            </span>
+                                                            <span>
+                                                                {honeypotAnalysis
+                                                                    ?.simulationResult
+                                                                    ?.maxBuy
+                                                                    ?.token
+                                                                    ? `${honeypotAnalysis.simulationResult.maxBuy.token} ${honeypotAnalysis.token.symbol}`
+                                                                    : "NO BUY LIMIT"}
                                                             </span>
                                                         </div>
                                                     </>
