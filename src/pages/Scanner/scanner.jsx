@@ -283,33 +283,40 @@ function Scanner() {
                         </span>
                     </div>
 
-                    <div className="mx-5">
+                    <div className="mx-5 my-5">
                         <Box
+                            className="md:flex"
                             sx={{
-                                display: "flex",
                                 alignItems: "flex-end",
                                 width: "full",
                             }}>
-                            <select
-                                value={network}
-                                onChange={(e) => setNetwork(e.target.value)}>
-                                <option value="BSC">BSC</option>
-                                <option value="Ethereum">Ethereum</option>
-                            </select>
-                            <div className="mx-5">
-                                <IoMdQrScanner size={35} />
+                            <div className="sm:my-3 md:my-0 sm:flex sm:justify-center">
+                                <select
+                                    className=""
+                                    value={network}
+                                    onChange={(e) =>
+                                        setNetwork(e.target.value)
+                                    }>
+                                    <option value="BSC">BSC</option>
+                                    <option value="Ethereum">Ethereum</option>
+                                </select>
                             </div>
-                            <TextField
-                                id="contract-address-input"
-                                label="ENTER CONTRACT ADDRESS"
-                                variant="standard"
-                                fullWidth
-                                value={contractAddress}
-                                onChange={(e) =>
-                                    setContractAddress(e.target.value)
-                                }
-                            />
-                            <div className="mx-2">
+                            <div className="sm:flex w-full">
+                                <div className="mx-2 sm:mt-4 md:mt-3">
+                                    <IoMdQrScanner size={35} />
+                                </div>
+                                <TextField
+                                    id="contract-address-input"
+                                    label="ENTER CONTRACT ADDRESS"
+                                    variant="standard"
+                                    fullWidth
+                                    value={contractAddress}
+                                    onChange={(e) =>
+                                        setContractAddress(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="sm:flex sm:justify-center mx-2 sm:my-3 md:my-0">
                                 <Button
                                     onClick={scanContract}
                                     variant="contained"
