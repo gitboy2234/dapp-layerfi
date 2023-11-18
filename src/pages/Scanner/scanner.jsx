@@ -155,12 +155,9 @@ function Scanner() {
             const response = await fetch(honeypotUrl);
             const data = await response.json();
 
-            // Check if the honeypotResult is present and set the analysis
             if (data && data.honeypotResult) {
                 setHoneypotAnalysis(data);
             } else {
-                // Fallback: Set the analysis to the response itself or a part of it
-                // Modify this according to the structure of your API response
                 const fallbackAnalysis = {
                     unknownStatus: true,
                     reason:
@@ -177,7 +174,11 @@ function Scanner() {
             setIsLoading(false);
         }
     };
-
+    const formatAddress = (address) => {
+        return window.innerWidth < 640
+            ? address.slice(0, 30) + "<br />" + address.slice(15)
+            : address;
+    };
     const copyToClipboard = () => {
         try {
             let summaryText = "";
@@ -357,7 +358,7 @@ function Scanner() {
                                                                     size={25}
                                                                 />
                                                             </span>
-                                                            <span className="mt-1">
+                                                            <span className="mt-1 text-justify">
                                                                 YES! This token
                                                                 is a honeypot,
                                                                 Please don't buy
@@ -371,7 +372,7 @@ function Scanner() {
                                                                     size={25}
                                                                 />
                                                             </span>
-                                                            <span className="mt-1">
+                                                            <span className="mt-1 text-justify">
                                                                 NO, you can
                                                                 safely buy this
                                                                 token, but be
@@ -407,18 +408,21 @@ function Scanner() {
                                                                 }
                                                             </span>
                                                         </div>
-                                                        <div className="flex">
+                                                        <div className="flex flex-col sm:flex-row">
                                                             <span className="text-green-500">
                                                                 ADDRESS:{" "}
                                                             </span>
-                                                            <span>
-                                                                {
-                                                                    honeypotAnalysis
-                                                                        .token
-                                                                        .address
-                                                                }
-                                                            </span>
+                                                            <span
+                                                                className=""
+                                                                dangerouslySetInnerHTML={{
+                                                                    __html: formatAddress(
+                                                                        honeypotAnalysis
+                                                                            .token
+                                                                            .address
+                                                                    ),
+                                                                }}></span>
                                                         </div>
+
                                                         <div>
                                                             <span className="text-green-500">
                                                                 TOTAL HOLDERS:{" "}
