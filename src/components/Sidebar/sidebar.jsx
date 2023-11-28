@@ -27,8 +27,8 @@ function Sidebar() {
     return (
         <div className="">
             <div className="sm:hidden lg:block showNav">
-                <div className="h-[800px] absolute w-[270px] mx-4 my-5 border-2 border-violet-500 backdrop-blur-md rounded-xl box-border">
-                    <div className="flex mx-auto mt-4">
+                <div className="w-full flex relative h-24  box-border justify-between ">
+                    <div className="flex  mt-4 ">
                         <div className="mx-auto my-auto">
                             <img
                                 className="h-[50px] pl-6"
@@ -36,18 +36,18 @@ function Sidebar() {
                                 src={logo}
                             />
                         </div>
-                        <div className="mx-auto my-auto pr-9 mt-2">
+                        <div className="my-auto  ">
                             <span className="text-4xl main-font">LAYERFi</span>
                         </div>
                     </div>
-                    <div className="mt-8">
-                        <ul className="space-y-2">
+                    <div className="mt-9 lg:ml-0 xl:ml-28  ">
+                        <ul className="space-x-3 flex ">
                             <li
-                                className={`border-2 border-violet-300 rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
+                                className={` rounded-lg bg-white  h-10 z-50 hover-effect ${
                                     isActive("/dashboard") ? "active-page" : ""
                                 }`}>
                                 <div className="slide-effect"></div>
-                                <div className=" absolute z-10">
+                                <div className=" relative z-10">
                                     <Link
                                         className="mx-5 flex space-x-3"
                                         to="/dashboard">
@@ -59,11 +59,11 @@ function Sidebar() {
                                 </div>
                             </li>
                             <li
-                                className={`border-2 border-violet-300 rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
+                                className={` rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
                                     isActive("/scanner") ? "active-page" : ""
                                 }`}>
                                 <div className="slide-effect"></div>
-                                <div className=" absolute z-10">
+                                <div className=" relative z-10">
                                     <Link
                                         className="mx-5 flex space-x-3"
                                         to="/scanner">
@@ -75,11 +75,11 @@ function Sidebar() {
                                 </div>
                             </li>
                             <li
-                                className={`border-2 border-violet-300 rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
+                                className={` rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
                                     isActive("/stake") ? "active-page" : ""
                                 }`}>
                                 <div className="slide-effect"></div>
-                                <div className=" absolute z-10">
+                                <div className="relative  z-10">
                                     <Link
                                         className="mx-5 flex space-x-3"
                                         to="/stake">
@@ -91,11 +91,11 @@ function Sidebar() {
                                 </div>
                             </li>
                             <li
-                                className={`border-2 border-violet-300 rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
+                                className={` rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
                                     isActive("/swap") ? "active-page" : ""
                                 }`}>
                                 <div className="slide-effect"></div>
-                                <div className=" absolute z-10">
+                                <div className=" relative z-10">
                                     <Link
                                         className="mx-5 flex space-x-3"
                                         to="/swap">
@@ -106,9 +106,9 @@ function Sidebar() {
                                     </Link>
                                 </div>
                             </li>
-                            <li className="border-2 border-violet-300 rounded-lg bg-white mx-6 h-10 z-50 hover-effect">
+                            <li className=" rounded-lg bg-white mx-6 h-10 z-50 hover-effect">
                                 <div className="slide-effect"></div>
-                                <div className=" absolute z-10">
+                                <div className=" relative z-10">
                                     <Link
                                         className="mx-5 flex space-x-3"
                                         to="/market">
@@ -120,11 +120,11 @@ function Sidebar() {
                                 </div>
                             </li>
                             <li
-                                className={`border-2 border-violet-300 rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
+                                className={` rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
                                     isActive("/social") ? "active-page" : ""
                                 }`}>
                                 <div className="slide-effect"></div>
-                                <div className=" absolute z-10">
+                                <div className=" relative z-10">
                                     <Link
                                         className="mx-5 flex space-x-3"
                                         to="/social">
@@ -140,46 +140,22 @@ function Sidebar() {
                                 </div>
                             </li>
                             <li
-                                className={`border-2 border-violet-300 rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
+                                className={` rounded-lg bg-white mx-6 h-10 z-50 hover-effect ${
                                     isActive("/buy") ? "active-page" : ""
                                 }`}>
                                 <div className="slide-effect"></div>
-                                <div className=" absolute z-10">
+                                <div className=" relative  z-10">
                                     <Link
                                         className="mx-5 flex space-x-3"
                                         to="/buy">
                                         <HiOutlineShoppingCart size={35} />
-                                        <span className="text-center text-xl my-auto">
-                                            BUY LAYER
+                                        <span className="text-center lg:text-sm 2xl:text-xl my-auto">
+                                            BUY LFIP
                                         </span>
                                     </Link>
                                 </div>
                             </li>
                         </ul>
-                    </div>
-                    <div className="mx-auto w-3/5 fixed left-[60px] bottom-8 text-center space-y-5 cursor-pointer">
-                        <div>
-                            <span className="sub-font">Contact Us</span>
-                        </div>
-                        <div className="flex space-x-5 ml-5">
-                            <a
-                                href="https://t.me/+BtvVuaUNcmYzYzdl"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:text-green-600">
-                                <FaTelegramPlane size={15} />
-                            </a>
-
-                            <a
-                                href="https://twitter.com/Layerfiofficial/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:text-green-600">
-                                <FaTwitter size={15} />
-                            </a>
-                            <FaDiscord size={15} />
-                            <FaBook size={15} />
-                        </div>
                     </div>
                 </div>
             </div>

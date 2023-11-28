@@ -1,6 +1,7 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar/sidebar";
 import "./soon.css";
+
 function Soon() {
     return (
         <div className=" z-50 relative w-full ">

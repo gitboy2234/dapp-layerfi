@@ -50,7 +50,9 @@
 .hover-effect:hover .slide-effect {
     left: 0; /* Slide to fill the box */
 }
-
+.div-box {
+    background-image: linear-gradient(to right, #a55be4, #c97df0);
+}
 .active-page {
     position: relative;
     border-left: 4px solid;
