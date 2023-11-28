@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(
     cors({
-        origin: "http://139.59.220.130:3000",
+        origin: "https://test.layerfi.net/",
     })
 );
 

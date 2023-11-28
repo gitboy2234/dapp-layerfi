@@ -261,7 +261,7 @@ function Scanner() {
         setIsLoading(true);
         try {
             const response = await fetch(
-                `http://139.59.220.130:3001/token-security?network=${network}&contractAddresses=${contractAddress}`
+                `https://test.layerfi.net/token-security?network=${network}&contractAddresses=${contractAddress}`
             );
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
