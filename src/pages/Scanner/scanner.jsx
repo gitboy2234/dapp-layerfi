@@ -334,7 +334,7 @@ function Scanner() {
             </div>
 
             <div className="relative mt-10 px-2 w-full ">
-                <div className="h-3/4 border-2 div-box rounded-xl mx-auto sm:w-full md:w-1/2 lg:ml-[300px] xl:ml-[500px] py-5 ">
+                <div className="h-3/4 border-2 div-box rounded-xl mx-auto sm:w-full md:w-3/4 lg:w-1/2 lg:ml-[300px] xl:ml-[500px] py-5 ">
                     <div className="flex border-b-2 border-violet-300 sm:justify-center md:justify-start pb-3 ">
                         <img className="h-[30px] pl-6" alt="logo" src={logo} />
                         <span className="my-auto mx-2 sub-font">
@@ -847,12 +847,7 @@ function Scanner() {
                                                                     }
                                                                 </span>
                                                             </div>
-                                                        ) : (
-                                                            <p>
-                                                                Loading token
-                                                                details...
-                                                            </p>
-                                                        )}
+                                                        ) : null}
                                                         <div>
                                                             <span className="text-yellow-500">
                                                                 TOTAL HOLDERS:{" "}
@@ -881,19 +876,22 @@ function Scanner() {
                                                     </>
                                                 )}
                                             </div>
-                                            <div className="flex flex-col sm:flex-row">
-                                                <span className=" text-yellow-500 my-auto">
-                                                    TOKEN ADDRESS:{" "}
-                                                </span>
-                                                <span
-                                                    className=""
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: formatAddress(
-                                                            honeypotAnalysis
-                                                                .token.address
-                                                        ),
-                                                    }}></span>
-                                            </div>
+                                            {honeypotAnalysis.token ? (
+                                                <div className="flex flex-col sm:flex-row">
+                                                    <span className=" text-yellow-500 my-auto">
+                                                        TOKEN ADDRESS:{" "}
+                                                    </span>
+                                                    <span
+                                                        className=""
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: formatAddress(
+                                                                honeypotAnalysis
+                                                                    .token
+                                                                    .address
+                                                            ),
+                                                        }}></span>
+                                                </div>
+                                            ) : null}
                                             {tokenDetails ? (
                                                 <div className=" flex">
                                                     <span className="text-yellow-500 my-auto">
@@ -906,9 +904,7 @@ function Scanner() {
                                                         }
                                                     </span>
                                                 </div>
-                                            ) : (
-                                                <p>Loading token details...</p>
-                                            )}
+                                            ) : null}
                                             {tokenDetails ? (
                                                 <div className=" flex">
                                                     <span className="text-yellow-500 my-auto">
@@ -921,9 +917,7 @@ function Scanner() {
                                                         }
                                                     </span>
                                                 </div>
-                                            ) : (
-                                                <p>Loading token details...</p>
-                                            )}
+                                            ) : null}
                                             {tokenDetails ? (
                                                 <p>
                                                     <span className="text-yellow-500">
@@ -933,9 +927,7 @@ function Scanner() {
 
                                                     {tokenDetails.total_supply}
                                                 </p>
-                                            ) : (
-                                                <p>Loading token details...</p>
-                                            )}
+                                            ) : null}
                                             {honeypotAnalysis.simulationResult && (
                                                 <>
                                                     <p
@@ -973,7 +965,7 @@ function Scanner() {
                                         <div></div>
                                     </div>
                                 ) : null}
-                                {tokenDetails ? (
+                                {tokenDetails && tokenDetails.holders && (
                                     <div className="div-box bg-opacity-40 px-5 py-5 sm:mx-3 rounded-md  mt-[40px] shadow-2xl ">
                                         <div className="bg-dark-600 text-black p-4 rounded-lg">
                                             <h2 className="text-xl font-bold mb-4 text-yellow-500">
@@ -1042,7 +1034,7 @@ function Scanner() {
                                             </div>
                                         </div>
                                     </div>
-                                ) : null}
+                                )}
                             </div>
                         )}
                     </div>
