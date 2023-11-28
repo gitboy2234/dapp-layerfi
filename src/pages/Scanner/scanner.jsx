@@ -17,10 +17,11 @@ function Scanner() {
     const [contractAnalysis, setContractAnalysis] = useState([]);
     const [honeypotAnalysis, setHoneypotAnalysis] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-
+    const [error, setError] = useState("");
     const [network, setNetwork] = useState("BSC");
     const [web3, setWeb3] = useState(null);
     const [tokenDetails, setTokenDetails] = useState(null);
+    const [hasInput, setHasInput] = useState(false);
 
     const [hasScanned, setHasScanned] = useState(false);
 
@@ -249,22 +250,36 @@ function Scanner() {
             ? address.slice(0, 30) + "<br />" + address.slice(15)
             : address;
     };
+    const handleInputChange = (e) => {
+        setContractAddress(e.target.value);
+        if (e.target.value.trim() !== "") {
+            setHasInput(true);
+        }
+    };
 
     const fetchTokenSecurityData = async (contractAddress, network) => {
         setIsLoading(true);
         try {
             const response = await fetch(
-                `http://localhost:3001/token-security?network=${network}&contractAddresses=${contractAddress}`
+                `http://139.59.220.130:3001/token-security?network=${network}&contractAddresses=${contractAddress}`
             );
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
-
+            if (!data.result || !data.result[contractAddress.toLowerCase()]) {
+                // Instead of throwing an error, set tokenDetails to null or an empty object
+                setTokenDetails(null); // or setTokenDetails({});
+                return null;
+            }
             setTokenDetails(data.result[contractAddress.toLowerCase()]);
             return data.result[contractAddress.toLowerCase()].holders;
         } catch (error) {
             console.error("Error fetching token security data:", error);
+            setError(
+                error.message || "An error occurred while fetching token data."
+            );
+            setTokenDetails(null);
             return null;
         } finally {
             setIsLoading(false);
@@ -341,9 +356,7 @@ function Scanner() {
                                     variant="outlined"
                                     fullWidth
                                     value={contractAddress}
-                                    onChange={(e) =>
-                                        setContractAddress(e.target.value)
-                                    }
+                                    onChange={handleInputChange}
                                     InputProps={{
                                         className: "sub-font rounded-md",
 
@@ -391,6 +404,18 @@ function Scanner() {
                     </div>
                 </div>
             </div>
+            {tokenDetails ? (
+                <div>{/* Content when token details are available */}</div>
+            ) : hasInput ? (
+                <div className=" text-center text-4xl my-5">
+                    <span>⚠️ </span>{" "}
+                    <span>PLEASE CHECK THE ADDRESS/NETWORK</span>
+                </div>
+            ) : (
+                <div className=" text-center text-4xl my-5">
+                    <p> PLEASE INPUT ADDRESS AND PICK CORRECT NETWORK</p>
+                </div>
+            )}
             {hasScanned ? (
                 <div className="md:grid md:grid-cols-2 sm:grid-cols-1 2xl:mx-[300px] my-[20px]">
                     <div className="mx-auto ">
@@ -399,286 +424,336 @@ function Scanner() {
                                 <CircularProgress />
                             </div>
                         ) : (
-                            <div className="mx-3 mt-[40px] div-box px-5 py-5 rounded-md bg-opacity-40 tracking-widest shadow-2xl">
-                                {contractAnalysis.map((line, index) => (
-                                    <p key={index} className={line.className}>
-                                        {line.text}
-                                    </p>
-                                ))}
-                                <p
-                                    className={
-                                        tokenDetails.is_mintable === 1
-                                            ? "text-red-500"
-                                            : "text-green-500"
-                                    }>
-                                    {tokenDetails.is_mintable === 1
-                                        ? "Min Function has Detected on Contract"
-                                        : "No Mint Function Detected on Contract"}
-                                </p>
-                                {tokenDetails.is_mintable === 1 ? (
-                                    <p className="text-white text-sm tracking-widest">
-                                        ❌ This contract includes a mint
-                                        function. The presence of a mint
-                                        function means that new tokens can be
-                                        created, potentially impacting the
-                                        token's scarcity and value. It's
-                                        important for token holders to be aware
-                                        of this feature as it could affect the
-                                        token's economics.
-                                    </p>
-                                ) : (
-                                    <p className="text-white text-sm tracking-widest">
-                                        ✅ This Contract has no mint function.
-                                        The absence of a hidden mint function is
-                                        generally positive, as it means the
-                                        number of tokens in circulation cannot
-                                        be arbitrarily increased, thus
-                                        protecting the token's price from
-                                        potential manipulation or unexpected
-                                        inflation.
-                                    </p>
+                            <div>
+                                {error && (
+                                    <p className="error-message">{error}</p>
                                 )}
-                                <p
-                                    className={
-                                        tokenDetails.can_take_back_ownership ===
-                                        1
-                                            ? "text-red-500"
-                                            : "text-green-500"
-                                    }>
-                                    {tokenDetails.can_take_back_ownership === 1
-                                        ? "Ownership Reclaim Detected in Contract"
-                                        : "No Ownership Reclaim Feature Detected in Contract"}
-                                </p>
-                                {tokenDetails.can_take_back_ownership === 1 ? (
-                                    <p className="text-white text-sm">
-                                        ❌ The ability to reclaim ownership has
-                                        been detected in this contract. This is
-                                        a potential red flag, as it implies that
-                                        even after renouncing ownership, the
-                                        original owners can regain control. This
-                                        feature can lead to centralization and
-                                        potential misuse, and thus warrants
-                                        caution.
-                                    </p>
-                                ) : (
-                                    <p className="text-white text-sm">
-                                        ✅ No feature to reclaim ownership is
-                                        present in this contract. This is a
-                                        positive indication of decentralization,
-                                        suggesting that once ownership is
-                                        renounced, it cannot be reclaimed. This
-                                        contributes to the contract’s
-                                        transparency and trustworthiness.
-                                    </p>
-                                )}
-                                <p
-                                    className={
-                                        tokenDetails.owner_change_balance === 1
-                                            ? "text-red-500"
-                                            : "text-green-500"
-                                    }>
-                                    {tokenDetails.owner_change_balance === 1
-                                        ? "Owner Can Change Balance Detected in Contract"
-                                        : "No Owner Change Balance Feature Detected in Contract"}
-                                </p>
-                                {tokenDetails.owner_change_balance === 1 ? (
-                                    <p className="text-white text-sm">
-                                        ❌ The contract allows the owner to
-                                        change token holder balances. This is a
-                                        significant red flag, as it means the
-                                        owner has the power to arbitrarily
-                                        modify balances, potentially leading to
-                                        asset manipulation, like zeroing out
-                                        balances or creating and selling off
-                                        tokens. This feature seriously
-                                        undermines the security and
-                                        trustworthiness of the contract.
-                                    </p>
-                                ) : (
-                                    <p className="text-white text-sm">
-                                        ✅ The contract does not permit the
-                                        owner to change token holder balances.
-                                        This is a positive aspect, enhancing the
-                                        trust and security of the contract by
-                                        ensuring that token holder balances
-                                        remain immutable by the owner,
-                                        protecting against potential
-                                        manipulation.
-                                    </p>
-                                )}
-                                <p
-                                    className={
-                                        tokenDetails.hidden_owner === 1
-                                            ? "text-red-500"
-                                            : "text-green-500"
-                                    }>
-                                    {tokenDetails.hidden_owner === 1
-                                        ? "Hidden Owner Detected in Contract"
-                                        : "No Hidden Owner Detected in Contract"}
-                                </p>
-                                {tokenDetails.hidden_owner === 1 ? (
-                                    <p className="text-white text-sm">
-                                        ❌ The contract has hidden owners. This
-                                        is a significant red flag, as hidden
-                                        ownership can be an indicator of
-                                        malicious intent. It suggests that
-                                        developers may retain control even after
-                                        seemingly abandoning ownership,
-                                        potentially enabling them to manipulate
-                                        the contract or its assets without
-                                        transparency.
-                                    </p>
-                                ) : (
-                                    <p className="text-white text-sm">
-                                        ✅ The contract does not have hidden
-                                        owners. This is a positive sign,
-                                        indicating more transparency and less
-                                        risk of manipulation by undisclosed
-                                        parties. The absence of hidden owners
-                                        supports the contract’s integrity and
-                                        trustworthiness.
-                                    </p>
-                                )}
-                                <p
-                                    className={
-                                        tokenDetails.selfdestruct === 1
-                                            ? "text-red-500"
-                                            : "text-green-500"
-                                    }>
-                                    {tokenDetails.selfdestruct === 1
-                                        ? "Self-Destruct Capability Detected in Contract"
-                                        : "No Self-Destruct Capability Detected in Contract"}
-                                </p>
-                                {tokenDetails.selfdestruct === 1 ? (
-                                    <p className="text-white text-sm">
-                                        ❌ The contract has a self-destruct
-                                        function. This is a critical red flag,
-                                        as it means the contract can be
-                                        destroyed, rendering all of its
-                                        functions unavailable and potentially
-                                        erasing all related assets. The presence
-                                        of such a function suggests a high risk,
-                                        as it allows for sudden termination of
-                                        the contract's operation and asset loss.
-                                    </p>
-                                ) : (
-                                    <p className="text-white text-sm">
-                                        ✅ The contract does not have a
-                                        self-destruct function. This is a
-                                        positive aspect, ensuring the contract's
-                                        permanence and the security of its
-                                        functions and related assets. The
-                                        absence of such a function reduces the
-                                        risk of sudden termination and asset
-                                        loss, contributing to the stability and
-                                        reliability of the contract.
-                                    </p>
-                                )}
-                                <p
-                                    className={
-                                        tokenDetails.is_anti_whale === "1"
-                                            ? "text-green-500"
-                                            : "text-red-500"
-                                    }>
-                                    {tokenDetails.is_anti_whale === "1"
-                                        ? "Anti-Whale Mechanism Detected in Contract"
-                                        : "No Anti-Whale Mechanism Detected in Contract"}
-                                </p>
+                                {tokenDetails ? (
+                                    <div className="mx-3 mt-[40px] div-box px-5 py-5 rounded-md bg-opacity-40 tracking-widest shadow-2xl">
+                                        {contractAnalysis.map((line, index) => (
+                                            <p
+                                                key={index}
+                                                className={line.className}>
+                                                {line.text}
+                                            </p>
+                                        ))}
+                                        <p
+                                            className={
+                                                tokenDetails.is_mintable === 1
+                                                    ? "text-red-500"
+                                                    : "text-green-500"
+                                            }>
+                                            {tokenDetails.is_mintable === 1
+                                                ? "Min Function has Detected on Contract"
+                                                : "No Mint Function Detected on Contract"}
+                                        </p>
+                                        {tokenDetails.is_mintable === 1 ? (
+                                            <p className="text-white text-sm tracking-widest">
+                                                ❌ This contract includes a mint
+                                                function. The presence of a mint
+                                                function means that new tokens
+                                                can be created, potentially
+                                                impacting the token's scarcity
+                                                and value. It's important for
+                                                token holders to be aware of
+                                                this feature as it could affect
+                                                the token's economics.
+                                            </p>
+                                        ) : (
+                                            <p className="text-white text-sm tracking-widest">
+                                                ✅ This Contract has no mint
+                                                function. The absence of a
+                                                hidden mint function is
+                                                generally positive, as it means
+                                                the number of tokens in
+                                                circulation cannot be
+                                                arbitrarily increased, thus
+                                                protecting the token's price
+                                                from potential manipulation or
+                                                unexpected inflation.
+                                            </p>
+                                        )}
+                                        <p
+                                            className={
+                                                tokenDetails.can_take_back_ownership ===
+                                                1
+                                                    ? "text-red-500"
+                                                    : "text-green-500"
+                                            }>
+                                            {tokenDetails.can_take_back_ownership ===
+                                            1
+                                                ? "Ownership Reclaim Detected in Contract"
+                                                : "No Ownership Reclaim Feature Detected in Contract"}
+                                        </p>
+                                        {tokenDetails.can_take_back_ownership ===
+                                        1 ? (
+                                            <p className="text-white text-sm">
+                                                ❌ The ability to reclaim
+                                                ownership has been detected in
+                                                this contract. This is a
+                                                potential red flag, as it
+                                                implies that even after
+                                                renouncing ownership, the
+                                                original owners can regain
+                                                control. This feature can lead
+                                                to centralization and potential
+                                                misuse, and thus warrants
+                                                caution.
+                                            </p>
+                                        ) : (
+                                            <p className="text-white text-sm">
+                                                ✅ No feature to reclaim
+                                                ownership is present in this
+                                                contract. This is a positive
+                                                indication of decentralization,
+                                                suggesting that once ownership
+                                                is renounced, it cannot be
+                                                reclaimed. This contributes to
+                                                the contract’s transparency and
+                                                trustworthiness.
+                                            </p>
+                                        )}
+                                        <p
+                                            className={
+                                                tokenDetails.owner_change_balance ===
+                                                1
+                                                    ? "text-red-500"
+                                                    : "text-green-500"
+                                            }>
+                                            {tokenDetails.owner_change_balance ===
+                                            1
+                                                ? "Owner Can Change Balance Detected in Contract"
+                                                : "No Owner Change Balance Feature Detected in Contract"}
+                                        </p>
+                                        {tokenDetails.owner_change_balance ===
+                                        1 ? (
+                                            <p className="text-white text-sm">
+                                                ❌ The contract allows the owner
+                                                to change token holder balances.
+                                                This is a significant red flag,
+                                                as it means the owner has the
+                                                power to arbitrarily modify
+                                                balances, potentially leading to
+                                                asset manipulation, like zeroing
+                                                out balances or creating and
+                                                selling off tokens. This feature
+                                                seriously undermines the
+                                                security and trustworthiness of
+                                                the contract.
+                                            </p>
+                                        ) : (
+                                            <p className="text-white text-sm">
+                                                ✅ The contract does not permit
+                                                the owner to change token holder
+                                                balances. This is a positive
+                                                aspect, enhancing the trust and
+                                                security of the contract by
+                                                ensuring that token holder
+                                                balances remain immutable by the
+                                                owner, protecting against
+                                                potential manipulation.
+                                            </p>
+                                        )}
+                                        <p
+                                            className={
+                                                tokenDetails.hidden_owner === 1
+                                                    ? "text-red-500"
+                                                    : "text-green-500"
+                                            }>
+                                            {tokenDetails.hidden_owner === 1
+                                                ? "Hidden Owner Detected in Contract"
+                                                : "No Hidden Owner Detected in Contract"}
+                                        </p>
+                                        {tokenDetails.hidden_owner === 1 ? (
+                                            <p className="text-white text-sm">
+                                                ❌ The contract has hidden
+                                                owners. This is a significant
+                                                red flag, as hidden ownership
+                                                can be an indicator of malicious
+                                                intent. It suggests that
+                                                developers may retain control
+                                                even after seemingly abandoning
+                                                ownership, potentially enabling
+                                                them to manipulate the contract
+                                                or its assets without
+                                                transparency.
+                                            </p>
+                                        ) : (
+                                            <p className="text-white text-sm">
+                                                ✅ The contract does not have
+                                                hidden owners. This is a
+                                                positive sign, indicating more
+                                                transparency and less risk of
+                                                manipulation by undisclosed
+                                                parties. The absence of hidden
+                                                owners supports the contract’s
+                                                integrity and trustworthiness.
+                                            </p>
+                                        )}
+                                        <p
+                                            className={
+                                                tokenDetails.selfdestruct === 1
+                                                    ? "text-red-500"
+                                                    : "text-green-500"
+                                            }>
+                                            {tokenDetails.selfdestruct === 1
+                                                ? "Self-Destruct Capability Detected in Contract"
+                                                : "No Self-Destruct Capability Detected in Contract"}
+                                        </p>
+                                        {tokenDetails.selfdestruct === 1 ? (
+                                            <p className="text-white text-sm">
+                                                ❌ The contract has a
+                                                self-destruct function. This is
+                                                a critical red flag, as it means
+                                                the contract can be destroyed,
+                                                rendering all of its functions
+                                                unavailable and potentially
+                                                erasing all related assets. The
+                                                presence of such a function
+                                                suggests a high risk, as it
+                                                allows for sudden termination of
+                                                the contract's operation and
+                                                asset loss.
+                                            </p>
+                                        ) : (
+                                            <p className="text-white text-sm">
+                                                ✅ The contract does not have a
+                                                self-destruct function. This is
+                                                a positive aspect, ensuring the
+                                                contract's permanence and the
+                                                security of its functions and
+                                                related assets. The absence of
+                                                such a function reduces the risk
+                                                of sudden termination and asset
+                                                loss, contributing to the
+                                                stability and reliability of the
+                                                contract.
+                                            </p>
+                                        )}
+                                        <p
+                                            className={
+                                                tokenDetails.is_anti_whale ===
+                                                "1"
+                                                    ? "text-green-500"
+                                                    : "text-red-500"
+                                            }>
+                                            {tokenDetails.is_anti_whale === "1"
+                                                ? "Anti-Whale Mechanism Detected in Contract"
+                                                : "No Anti-Whale Mechanism Detected in Contract"}
+                                        </p>
 
-                                {tokenDetails.is_anti_whale === "1" ? (
-                                    <p className="text-white text-sm">
-                                        ✅ The contract includes an anti-whale
-                                        mechanism. This means there are
-                                        limitations in place to prevent single
-                                        addresses from holding or transacting
-                                        large amounts of tokens, which helps in
-                                        reducing the risk of market manipulation
-                                        by large holders. Such features promote
-                                        fairer distribution and help maintain
-                                        market stability.
-                                    </p>
-                                ) : (
-                                    <p className="text-white text-sm">
-                                        ❌ There is no anti-whale mechanism in
-                                        this contract. This implies that there
-                                        are no restrictions on the amount of
-                                        tokens a single address can hold or
-                                        transact. While this allows for
-                                        unrestricted trading, it also means that
-                                        large holders (whales) could potentially
-                                        influence the market significantly,
-                                        which might lead to volatility or unfair
-                                        practices.
-                                    </p>
-                                )}
-                                <p
-                                    className={
-                                        tokenDetails.transfer_pausable === "1"
-                                            ? "text-red-500"
-                                            : "text-green-500"
-                                    }>
-                                    {tokenDetails.transfer_pausable === "1"
-                                        ? "Trading Can Be Paused Detected in Contract"
-                                        : "Trading Cannot Be Paused Detected in Contract"}
-                                </p>
+                                        {tokenDetails.is_anti_whale === "1" ? (
+                                            <p className="text-white text-sm">
+                                                ✅ The contract includes an
+                                                anti-whale mechanism. This means
+                                                there are limitations in place
+                                                to prevent single addresses from
+                                                holding or transacting large
+                                                amounts of tokens, which helps
+                                                in reducing the risk of market
+                                                manipulation by large holders.
+                                                Such features promote fairer
+                                                distribution and help maintain
+                                                market stability.
+                                            </p>
+                                        ) : (
+                                            <p className="text-white text-sm">
+                                                ❌ There is no anti-whale
+                                                mechanism in this contract. This
+                                                implies that there are no
+                                                restrictions on the amount of
+                                                tokens a single address can hold
+                                                or transact. While this allows
+                                                for unrestricted trading, it
+                                                also means that large holders
+                                                (whales) could potentially
+                                                influence the market
+                                                significantly, which might lead
+                                                to volatility or unfair
+                                                practices.
+                                            </p>
+                                        )}
+                                        <p
+                                            className={
+                                                tokenDetails.transfer_pausable ===
+                                                "1"
+                                                    ? "text-red-500"
+                                                    : "text-green-500"
+                                            }>
+                                            {tokenDetails.transfer_pausable ===
+                                            "1"
+                                                ? "Trading Can Be Paused Detected in Contract"
+                                                : "Trading Cannot Be Paused Detected in Contract"}
+                                        </p>
 
-                                {tokenDetails.transfer_pausable === "1" ? (
-                                    <p className="text-white text-sm">
-                                        ❌ This contract has the capability to
-                                        pause trading. This means the contract
-                                        owner can suspend trading activities at
-                                        any time. While this can be used for
-                                        security reasons, it also centralizes
-                                        control and could lead to situations
-                                        where token holders are unable to sell
-                                        their tokens except those with special
-                                        permissions. This feature requires
-                                        careful consideration of the contract
-                                        owner's intentions and trustworthiness.
-                                    </p>
-                                ) : (
-                                    <p className="text-white text-sm">
-                                        ✅ Trading cannot be paused in this
-                                        contract. This ensures continuous
-                                        trading availability for all token
-                                        holders, providing a more predictable
-                                        and open trading environment. The
-                                        absence of such a pause feature reduces
-                                        the risk of centralization and potential
-                                        manipulation by the contract owner.
-                                    </p>
-                                )}
+                                        {tokenDetails.transfer_pausable ===
+                                        "1" ? (
+                                            <p className="text-white text-sm">
+                                                ❌ This contract has the
+                                                capability to pause trading.
+                                                This means the contract owner
+                                                can suspend trading activities
+                                                at any time. While this can be
+                                                used for security reasons, it
+                                                also centralizes control and
+                                                could lead to situations where
+                                                token holders are unable to sell
+                                                their tokens except those with
+                                                special permissions. This
+                                                feature requires careful
+                                                consideration of the contract
+                                                owner's intentions and
+                                                trustworthiness.
+                                            </p>
+                                        ) : (
+                                            <p className="text-white text-sm">
+                                                ✅ Trading cannot be paused in
+                                                this contract. This ensures
+                                                continuous trading availability
+                                                for all token holders, providing
+                                                a more predictable and open
+                                                trading environment. The absence
+                                                of such a pause feature reduces
+                                                the risk of centralization and
+                                                potential manipulation by the
+                                                contract owner.
+                                            </p>
+                                        )}
 
-                                <p
-                                    className={
-                                        verificationStatus ===
-                                        "This contract is verified."
-                                            ? "text-green-500"
-                                            : "text-red-500"
-                                    }>
-                                    {verificationStatus}
-                                </p>
-                                {verificationStatus ===
-                                "This contract is verified." ? (
-                                    <p className="text-sm text-white">
-                                        ✅ Great news! The contract's source
-                                        code has been verified, indicating
-                                        transparency and reliability. This
-                                        verification means the contract's
-                                        operations can be trusted and are
-                                        accessible for public audit.
-                                    </p>
-                                ) : (
-                                    <p className="text-sm text-white">
-                                        ❌ The contract has not been verified.
-                                        This status warrants caution as the
-                                        source code has not been reviewed for
-                                        transparency and security by the
-                                        community. It's advisable to conduct
-                                        thorough due diligence before
-                                        interaction.
-                                    </p>
-                                )}
+                                        <p
+                                            className={
+                                                verificationStatus ===
+                                                "This contract is verified."
+                                                    ? "text-green-500"
+                                                    : "text-red-500"
+                                            }>
+                                            {verificationStatus}
+                                        </p>
+                                        {verificationStatus ===
+                                        "This contract is verified." ? (
+                                            <p className="text-sm text-white">
+                                                ✅ Great news! The contract's
+                                                source code has been verified,
+                                                indicating transparency and
+                                                reliability. This verification
+                                                means the contract's operations
+                                                can be trusted and are
+                                                accessible for public audit.
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-white">
+                                                ❌ The contract has not been
+                                                verified. This status warrants
+                                                caution as the source code has
+                                                not been reviewed for
+                                                transparency and security by the
+                                                community. It's advisable to
+                                                conduct thorough due diligence
+                                                before interaction.
+                                            </p>
+                                        )}
+                                    </div>
+                                ) : null}
                             </div>
                         )}
                     </div>
@@ -691,8 +766,8 @@ function Scanner() {
                             </div>
                         ) : (
                             <div className="grid md:grid-rows-2 sm:grid-rows-1 space-y-5 tracking-widest ">
-                                <div className="div-box bg-opacity-40 px-5 py-5 sm:mx-3 rounded-md  mt-[40px] shadow-2xl ">
-                                    {honeypotAnalysis ? (
+                                {honeypotAnalysis ? (
+                                    <div className="div-box bg-opacity-40 px-5 py-5 sm:mx-3 rounded-md  mt-[40px] shadow-2xl ">
                                         <>
                                             <div>
                                                 <span className="text-yellow-500 text-2xl">
@@ -759,18 +834,25 @@ function Scanner() {
                                                                 }
                                                             </span>
                                                         </div>
-                                                        <div className=" flex">
-                                                            <span className="text-yellow-500 my-auto">
-                                                                Token Symbol:{" "}
-                                                            </span>
-                                                            <span>$</span>
-                                                            <span className=" ">
-                                                                {
-                                                                    tokenDetails.token_symbol
-                                                                }
-                                                            </span>
-                                                        </div>
-
+                                                        {tokenDetails ? (
+                                                            <div className=" flex">
+                                                                <span className="text-yellow-500 my-auto">
+                                                                    Token
+                                                                    Symbol:{" "}
+                                                                </span>
+                                                                <span>$</span>
+                                                                <span className=" ">
+                                                                    {
+                                                                        tokenDetails.token_symbol
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <p>
+                                                                Loading token
+                                                                details...
+                                                            </p>
+                                                        )}
                                                         <div>
                                                             <span className="text-yellow-500">
                                                                 TOTAL HOLDERS:{" "}
@@ -812,34 +894,48 @@ function Scanner() {
                                                         ),
                                                     }}></span>
                                             </div>
-                                            <div className=" flex">
-                                                <span className="text-yellow-500 my-auto">
-                                                    Owner Address:{" "}
-                                                </span>
+                                            {tokenDetails ? (
+                                                <div className=" flex">
+                                                    <span className="text-yellow-500 my-auto">
+                                                        Owner Address:{" "}
+                                                    </span>
 
-                                                <span className=" ">
-                                                    {tokenDetails.owner_address}
-                                                </span>
-                                            </div>
-                                            <div className=" flex">
-                                                <span className="text-yellow-500 my-auto">
-                                                    Creator Address:{" "}
-                                                </span>
+                                                    <span className=" ">
+                                                        {
+                                                            tokenDetails.owner_address
+                                                        }
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <p>Loading token details...</p>
+                                            )}
+                                            {tokenDetails ? (
+                                                <div className=" flex">
+                                                    <span className="text-yellow-500 my-auto">
+                                                        Creator Address:{" "}
+                                                    </span>
 
-                                                <span className="">
-                                                    {
-                                                        tokenDetails.creator_address
-                                                    }
-                                                </span>
-                                            </div>
-                                            <p>
-                                                <span className="text-yellow-500">
-                                                    {" "}
-                                                    Total Supply:{" "}
-                                                </span>
+                                                    <span className="">
+                                                        {
+                                                            tokenDetails.creator_address
+                                                        }
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <p>Loading token details...</p>
+                                            )}
+                                            {tokenDetails ? (
+                                                <p>
+                                                    <span className="text-yellow-500">
+                                                        {" "}
+                                                        Total Supply:{" "}
+                                                    </span>
 
-                                                {tokenDetails.total_supply}
-                                            </p>
+                                                    {tokenDetails.total_supply}
+                                                </p>
+                                            ) : (
+                                                <p>Loading token details...</p>
+                                            )}
                                             {honeypotAnalysis.simulationResult && (
                                                 <>
                                                     <p
@@ -873,76 +969,80 @@ function Scanner() {
                                                 </>
                                             )}
                                         </>
-                                    ) : (
-                                        <p>
-                                            No data available. Please Scan
-                                            Contract.
-                                        </p>
-                                    )}
 
-                                    <div></div>
-                                </div>
-                                <div className="div-box bg-opacity-40 px-5 py-5 sm:mx-3 rounded-md  mt-[40px] shadow-2xl ">
-                                    <div className="bg-dark-600 text-black p-4 rounded-lg">
-                                        <h2 className="text-xl font-bold mb-4 text-yellow-500">
-                                            Top 10 Holders
-                                        </h2>
-                                        <div className="overflow-auto">
-                                            <table className="w-full">
-                                                <thead>
-                                                    <tr>
-                                                        <th className="text-left text-yellow-500">
-                                                            Address
-                                                        </th>
-                                                        <th className="text-left text-yellow-500">
-                                                            Balance
-                                                        </th>
-                                                        <th className="text-left text-yellow-500">
-                                                            Percent
-                                                        </th>
-                                                        <th className="text-left text-yellow-500">
-                                                            Type
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {tokenDetails.holders
-                                                        .slice(0, 10)
-                                                        .map(
-                                                            (holder, index) => (
-                                                                <tr key={index}>
-                                                                    <td className="truncate">
-                                                                        {truncateAddress(
-                                                                            holder.address
-                                                                        )}
-                                                                    </td>
-                                                                    <td className="text-left">
-                                                                        {formatBalance(
-                                                                            holder.balance
-                                                                        )}
-                                                                    </td>
-                                                                    <td className="text-left">{`${formatPercentage(
-                                                                        holder.percent
-                                                                    )}%`}</td>
-                                                                    <td className="text-left">
-                                                                        {holder.is_contract ===
-                                                                            1 &&
-                                                                        holder.is_locked ===
-                                                                            1
-                                                                            ? "LP"
-                                                                            : holder.is_contract ===
-                                                                              1
-                                                                            ? "Contract"
-                                                                            : "Wallet"}
-                                                                    </td>
-                                                                </tr>
-                                                            )
-                                                        )}
-                                                </tbody>
-                                            </table>
+                                        <div></div>
+                                    </div>
+                                ) : null}
+                                {tokenDetails ? (
+                                    <div className="div-box bg-opacity-40 px-5 py-5 sm:mx-3 rounded-md  mt-[40px] shadow-2xl ">
+                                        <div className="bg-dark-600 text-black p-4 rounded-lg">
+                                            <h2 className="text-xl font-bold mb-4 text-yellow-500">
+                                                Top 10 Holders
+                                            </h2>
+                                            <div className="overflow-auto">
+                                                <table className="w-full">
+                                                    <thead>
+                                                        <tr>
+                                                            <th className="text-left text-yellow-500">
+                                                                Address
+                                                            </th>
+                                                            <th className="text-left text-yellow-500">
+                                                                Balance
+                                                            </th>
+                                                            <th className="text-left text-yellow-500">
+                                                                Percent
+                                                            </th>
+                                                            <th className="text-left text-yellow-500">
+                                                                Type
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        {tokenDetails.holders
+                                                            .slice(0, 10)
+                                                            .map(
+                                                                (
+                                                                    holder,
+                                                                    index
+                                                                ) => (
+                                                                    <tr
+                                                                        key={
+                                                                            index
+                                                                        }>
+                                                                        <td className="truncate">
+                                                                            {truncateAddress(
+                                                                                holder.address
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="text-left">
+                                                                            {formatBalance(
+                                                                                holder.balance
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="text-left">{`${formatPercentage(
+                                                                            holder.percent
+                                                                        )}%`}</td>
+                                                                        <td className="text-left">
+                                                                            {holder.is_contract ===
+                                                                                1 &&
+                                                                            holder.is_locked ===
+                                                                                1
+                                                                                ? "LP"
+                                                                                : holder.is_contract ===
+                                                                                  1
+                                                                                ? "Contract"
+                                                                                : "Wallet"}
+                                                                        </td>
+                                                                    </tr>
+                                                                )
+                                                            )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ) : null}
                             </div>
                         )}
                     </div>
