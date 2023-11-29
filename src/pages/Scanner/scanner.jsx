@@ -334,7 +334,7 @@ function Scanner() {
             </div>
 
             <div className="relative mt-10 px-2 w-full ">
-                <div className="h-3/4 border-2 div-box rounded-xl mx-auto sm:w-full md:w-3/4 lg:w-1/2 lg:ml-[300px] xl:ml-[310px] 2xl:ml-[400px] py-5 shadow-2xl ">
+                <div className="h-3/4 border-2 div-box rounded-xl mx-auto sm:w-full md:w-3/4 lg:w-1/2 lg:ml-[300px] xl:ml-[310px] 2xl:ml-[450px] py-5 shadow-2xl ">
                     <div className="flex border-b-2 border-violet-300 sm:justify-center md:justify-start pb-3 ">
                         <img className="h-[30px] pl-6" alt="logo" src={logo} />
                         <span className="my-auto mx-2 sub-font">
