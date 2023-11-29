@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { useRoutes } from "react-router-dom";
+import { useRoutes, useLocation } from "react-router-dom";
 import Scanner from "../src/pages/Scanner/scanner";
-import FloozWidget from "../src/pages/swap/swap";
+import RedirectToSwapUrl from "../src/components/RedirectToSwapUrl";
 import RedirectToExternalUrl from "../src/components/RedirectToExternalUrl";
 import RedirectToBuy from "../src/components/RedirectToBuyUrl";
 import RedirectToMarketUrl from "../src/components/RedirectToMarketUrl";
@@ -13,7 +13,8 @@ function App() {
     helix.register();
     const [loading, setLoading] = useState(true);
     const [showLoader, setShowLoader] = useState(true);
-
+    const location = useLocation();
+    const [path, setPath] = useState(location.pathname);
     let element = useRoutes([
         {
             path: "/",
@@ -29,7 +30,7 @@ function App() {
         },
         {
             path: "/swap",
-            element: <FloozWidget />,
+            element: <RedirectToSwapUrl url="https://swap.layerfi.net/" />,
         },
         {
             path: "/buy",
@@ -52,19 +53,28 @@ function App() {
     ]);
 
     useEffect(() => {
-        const fadeOutTimer = setTimeout(() => {
+        // Show loader on route change
+        setShowLoader(true);
+        setLoading(true);
+
+        // Hide loader after a delay
+        const loaderHideTimer = setTimeout(() => {
             setLoading(false);
         }, 3000);
 
-        const loaderHideTimer = setTimeout(() => {
+        const fadeOutTimer = setTimeout(() => {
             setShowLoader(false);
         }, 4000);
 
         return () => {
-            clearTimeout(fadeOutTimer);
             clearTimeout(loaderHideTimer);
+            clearTimeout(fadeOutTimer);
         };
-    }, []);
+    }, [path]);
+
+    useEffect(() => {
+        setPath(location.pathname);
+    }, [location]);
 
     return (
         <div className="">

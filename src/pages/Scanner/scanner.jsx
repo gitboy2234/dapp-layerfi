@@ -268,8 +268,7 @@ function Scanner() {
             }
             const data = await response.json();
             if (!data.result || !data.result[contractAddress.toLowerCase()]) {
-                // Instead of throwing an error, set tokenDetails to null or an empty object
-                setTokenDetails(null); // or setTokenDetails({});
+                setTokenDetails(null);
                 return null;
             }
             setTokenDetails(data.result[contractAddress.toLowerCase()]);
@@ -420,7 +419,7 @@ function Scanner() {
                 </div>
             )}
             {hasScanned ? (
-                <div className="md:grid md:grid-cols-2 sm:grid-cols-1 2xl:mx-[300px] my-[20px]">
+                <div className="md:grid md:grid-cols-2 sm:grid-cols-1 2xl:mx-[300px]  my-[20px]">
                     <div className="mx-auto ">
                         {isLoading ? (
                             <div className="flex justify-center items-center mt-5">
@@ -432,7 +431,7 @@ function Scanner() {
                                     <p className="error-message">{error}</p>
                                 )}
                                 {tokenDetails ? (
-                                    <div className="mx-3 mt-[40px] div-box px-5 py-5 rounded-md bg-opacity-40 tracking-widest shadow-2xl">
+                                    <div className="mx-3 mt-[40px] div-box px-5 py-5 rounded-md bg-opacity-40 tracking-widest  shadow-2xl">
                                         {contractAnalysis.map((line, index) => (
                                             <p
                                                 key={index}
@@ -770,7 +769,7 @@ function Scanner() {
                         ) : (
                             <div className="grid md:grid-rows-2 sm:grid-rows-1 space-y-5 tracking-widest ">
                                 {honeypotAnalysis ? (
-                                    <div className="div-box bg-opacity-40 px-5 py-5 sm:mx-3 rounded-md  mt-[40px] shadow-2xl ">
+                                    <div className="div-box bg-opacity-40 px-5 py-5 sm:mx-3 rounded-md  sm:mt-[20px] md:mt-[40px] shadow-2xl ">
                                         <>
                                             <div>
                                                 <span className="text-yellow-500 text-2xl">
@@ -852,7 +851,7 @@ function Scanner() {
                                                             </div>
                                                         ) : null}
                                                         <div>
-                                                            <span className="text-yellow-500">
+                                                            <span className="text-yellow-500 ">
                                                                 TOTAL HOLDERS:{" "}
                                                             </span>
                                                             <span>
@@ -901,11 +900,13 @@ function Scanner() {
                                                         Owner Address:{" "}
                                                     </span>
 
-                                                    <span className=" ">
-                                                        {
-                                                            tokenDetails.owner_address
-                                                        }
-                                                    </span>
+                                                    <span
+                                                        className=""
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: formatAddress(
+                                                                tokenDetails.owner_address
+                                                            ),
+                                                        }}></span>
                                                 </div>
                                             ) : null}
                                             {tokenDetails ? (
@@ -914,11 +915,13 @@ function Scanner() {
                                                         Creator Address:{" "}
                                                     </span>
 
-                                                    <span className="">
-                                                        {
-                                                            tokenDetails.creator_address
-                                                        }
-                                                    </span>
+                                                    <span
+                                                        className=""
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: formatAddress(
+                                                                tokenDetails.creator_address
+                                                            ),
+                                                        }}></span>
                                                 </div>
                                             ) : null}
                                             {tokenDetails ? (

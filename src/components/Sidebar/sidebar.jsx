@@ -10,7 +10,7 @@ import {
 import { IoMdQrScanner } from "react-icons/io";
 import { RiTokenSwapLine } from "react-icons/ri";
 import { FaTelegramPlane, FaTwitter, FaDiscord, FaBook } from "react-icons/fa";
-import { GiHamburgerMenu } from "react-icons/gi";
+import { FaAngleRight } from "react-icons/fa6";
 import { LuCandlestickChart } from "react-icons/lu";
 import socialfi from "../../assets/Images/socialfi.png";
 
@@ -162,8 +162,8 @@ function Sidebar() {
 
             {hideSidebar ? (
                 <div className="flex lg:hidden">
-                    <div className="cursor-pointer hover:text-lime-400 sm:text-violet-500 absolute sm:left-0 sm:pt-10 sm:pr-4">
-                        <GiHamburgerMenu size={30} onClick={toggleChecked} />
+                    <div className="cursor-pointer hover:text-lime-400 sm:text-blue-500 absolute sm:left-0  sm:pr-4">
+                        <FaAngleRight size={50} onClick={toggleChecked} />
                     </div>
                 </div>
             ) : (
