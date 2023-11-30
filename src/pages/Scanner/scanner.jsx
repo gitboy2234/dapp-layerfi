@@ -341,7 +341,7 @@ function Scanner() {
                         </span>
                     </div>
 
-                    <div className="mx-5 my-5 shadow-2xl">
+                    <div className="mx-5 my-5 sm:shadow-2xl md:shadow-none">
                         <Box
                             className="md:flex "
                             sx={{
