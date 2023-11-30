@@ -348,6 +348,17 @@ function Scanner() {
                                 alignItems: "flex-end",
                                 width: "full",
                             }}>
+                            <div className="sm:my-2 md:my-0 sm:flex sm:justify-center sub-font  ">
+                                <select
+                                    className="rounded-lg  sm:w-[70px]  md:w-[110px]"
+                                    value={network}
+                                    onChange={(e) =>
+                                        setNetwork(e.target.value)
+                                    }>
+                                    <option value="BSC">BSC</option>
+                                    <option value="Ethereum">ETH</option>
+                                </select>
+                            </div>
                             <div className="sm:flex w-full ">
                                 <TextField
                                     id="contract-address-input"
@@ -365,7 +376,7 @@ function Scanner() {
                                         endAdornment: (
                                             <InputAdornment position="end">
                                                 {" "}
-                                                <div className="sm:flex sm:justify-center mx-2 sm:my-3 md:my-0">
+                                                <div className="sm:flex sm:justify-center  sm:my-3 md:my-0">
                                                     <Button
                                                         onClick={scanContract}
                                                         variant="contained"
@@ -375,27 +386,6 @@ function Scanner() {
                                                         }}>
                                                         SCAN
                                                     </Button>
-                                                </div>
-                                            </InputAdornment>
-                                        ),
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <div className="sm:my-2 md:my-0 sm:flex sm:justify-center sub-font ">
-                                                    <select
-                                                        className="rounded-lg mx-2"
-                                                        value={network}
-                                                        onChange={(e) =>
-                                                            setNetwork(
-                                                                e.target.value
-                                                            )
-                                                        }>
-                                                        <option value="BSC">
-                                                            BSC
-                                                        </option>
-                                                        <option value="Ethereum">
-                                                            Ethereum
-                                                        </option>
-                                                    </select>
                                                 </div>
                                             </InputAdornment>
                                         ),
