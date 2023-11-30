@@ -341,16 +341,16 @@ function Scanner() {
                         </span>
                     </div>
 
-                    <div className="mx-5 my-5 shadow-2xl">
+                    <div className="mx-5 my-5 ">
                         <Box
                             className="md:flex "
                             sx={{
                                 alignItems: "flex-end",
                                 width: "full",
                             }}>
-                            <div className=" md:my-0 sm:flex sm:justify-center sub-font ">
+                            <div className=" md:my-0 sm:flex sm:justify-center sub-font mx-2">
                                 <select
-                                    className="rounded-lg  sm:w-[70px]   md:w-[110px]  mb-4 shadow-2xl "
+                                    className="rounded-lg  sm:w-[70px]   md:w-[110px]  mb-4 "
                                     value={network}
                                     onChange={(e) =>
                                         setNetwork(e.target.value)
